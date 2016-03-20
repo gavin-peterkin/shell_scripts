@@ -1,0 +1,43 @@
+#!/bin/bash
+
+url_path="$1"
+grep_exp="$2"
+
+
+if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
+	echo "Incorrect number of arguments. Correct syntax = 'grep_scraper <url_path> <grep_exp> <output = out>'"
+	exit
+elif [ "$#" -eq 3 ]; then
+	out_file="$3"
+else
+	out_file="out"
+fi
+
+#Information provided to user
+echo "====================="
+echo "Url file: $url_path"
+echo "grep file: $grep_exp"
+echo "output file: $out_file"
+echo "====================="
+
+#Calculate number of urls
+num_urls=$(wc -l < "$url_path")
+
+k=1
+
+#Loop through each URL and append data to CSV
+while read line; do
+	echo "====================="
+	echo "Curling $line number: $k / $num_urls"
+	echo "====================="
+	html=$(curl "$line")
+	(( k++ ))
+	echo -n "$line" >> "$out_file"
+	while read regex; do
+		# use bash regex to extract data
+		if [[ "$html" =~ $regex ]]; then
+			echo -n ",${BASH_REMATCH[1]}" >> "$out_file"
+		fi
+	done < "$grep_exp"
+	echo "" >> "$out_file"
+done < "$url_path"
