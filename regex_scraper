@@ -37,6 +37,8 @@ while read line; do
 		# use bash regex to extract data
 		if [[ "$html" =~ $regex ]]; then
 			echo -n ",${BASH_REMATCH[1]}" >> "$out_file"
+		else
+			echo -n "," >> "$out_file"
 		fi
 	done < "$grep_exp"
 	echo "" >> "$out_file"
